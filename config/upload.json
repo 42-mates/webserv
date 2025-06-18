@@ -1,0 +1,29 @@
+[
+	{
+		"host": "0.0.0.0",
+		"port": 8888,
+		"routes":
+		[
+			{
+				"methods": ["GET", "POST"],
+				"route": "/",
+				"directory": "./upload",
+				"upload": "./upload"
+			}
+		]
+	},
+	{
+		"host": "0.0.0.0",
+		"port": 8889,
+		"max_body": 10,
+		"routes":
+		[
+			{
+				"methods": ["GET", "POST"],
+				"route": "/",
+				"directory": "./upload",
+				"upload": "./upload"
+			}
+		]
+	}
+]
