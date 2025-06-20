@@ -10,16 +10,28 @@ void	handle_sigint(int _sig) {throw (int)_sig;}
 
 int	main(int ac, char** av)
 {
-	if (ac != 2)
+	std::string config_path;
+
+	if (ac == 2)
+		config_path = av[1];
+	else if (ac == 1) {
+		config_path = DEFAULT_CONFIG;
+		std::cout << "No config provided. Using default: " << config_path << std::endl;
+	} else {
+		std::cerr << "Usage: ./webserv [config_file]" << std::endl;
 		return 1;
-	if (end_with_json(av[1]) == false || is_directory(av[1]))
-	{
+	}
+
+	if (!end_with_json(config_path) || is_directory(config_path)) {
 		std::cerr << "Error: Configuration must be a json file." << std::endl;
 		return 1;
 	}
-	std::ifstream	input(av[1]);
-	if (!input)
+	std::ifstream	input(config_path.c_str());
+	if (!input) {
+		std::cerr << "Error: Cannot open config file: " << config_path << std::endl;
 		return 1;
+	}
+
 	try
 	{
 		signal(SIGINT, handle_sigint);

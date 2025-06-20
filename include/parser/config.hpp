@@ -11,6 +11,7 @@
 # include <limits>
 # include <sys/socket.h>
 # include <arpa/inet.h>
+# define DEFAULT_CONFIG "config/config.json"
 
 class	Config
 {
