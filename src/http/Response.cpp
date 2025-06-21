@@ -422,6 +422,7 @@ const std::map<std::string, std::string>	Response::initAcceptedFileReversed()
 	tmp["js"] = "text/javascript";
 	tmp["gif"] = "image/gif";
 	tmp["jpeg"] = "image/jpeg";
+	tmp["jpg"] = "image/jpeg";
 	tmp["png"] = "image/png";
 	tmp["mp3"] = "audio/mpeg";
 	tmp["mp4"] = "video/mp4";
