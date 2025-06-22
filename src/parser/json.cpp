@@ -124,7 +124,7 @@ JsonValue&	JsonValue::insert(member_type value)
 	if (_type != JsonType::TOBJECT)
 		throw std::runtime_error("Invalid json type: expected object.\n");
 	if (_object->find(value.first) != _object->end())
-		throw std::runtime_error("Duplicate keys in object.\n");
+		throw std::runtime_error("Duplicate key: \"" + value.first + "\" in object.\n");
 	this->_object->insert(value);
 	return *this;
 }

@@ -16,7 +16,7 @@ class	JsonValue
 		class	BadType: public std::exception
 		{
 			const char* what() const throw() {
-				return "bad type";
+				return "bad type\n";
 			}
 		};
 

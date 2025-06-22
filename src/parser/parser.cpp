@@ -3,15 +3,15 @@
 JsonValue::member_type	JsonParser::handle_member(const_iter& begin, const const_iter& end)
 {
 	if (begin->type != JsonLexer::TokenType::STRING)
-		throw std::runtime_error("Invalid object: 'key' member is invalid");
+		throw std::runtime_error("Invalid object: 'key' member is invalid\n");
 	std::string	str = begin->value;
 
 	if (++begin == end)
-		throw std::runtime_error("Invalid object: [1] missing syntax in member");
+		throw std::runtime_error("Invalid object: [1] missing syntax in member\n");
 	else if (begin->type != JsonLexer::TokenType::COLON)
-		throw std::runtime_error("Invalid object: [2] missing syntax in member");
+		throw std::runtime_error("Invalid object: [2] missing syntax in member\n");
 	if (++begin == end)
-		throw std::runtime_error("Invalid object: [3] missing syntax in member");
+		throw std::runtime_error("Invalid object: [3] missing syntax in member\n");
 
 	JsonValue	val = handle_tokens(begin, end);
 	return JsonValue::member_type(str, val);
@@ -27,11 +27,11 @@ JsonValue	JsonParser::handle_object(const_iter& begin, const const_iter& end)
 			break ;
 		obj.insert(handle_member(begin, end));
 		if (++begin == end)
-			throw std::runtime_error("invalid object: [1] missing syntax");
+			throw std::runtime_error("invalid object: [1] missing syntax\n");
 		else if (begin->type == JsonLexer::TokenType::RCURLY)
 			break ;
 		else if (begin->type != JsonLexer::TokenType::COMMA)
-			throw std::runtime_error("invalid object: [2] missing syntax");
+			throw std::runtime_error("invalid object: [2] missing syntax\n");
 	}
 	return obj;
 }
@@ -46,19 +46,19 @@ JsonValue	JsonParser::handle_array(const_iter& begin, const const_iter& end)
 			break ;
 		arr.push_back(handle_tokens(begin, end));
 		if (++begin == end)
-			throw std::runtime_error("invalid array: missing syntax");
+			throw std::runtime_error("invalid array: missing syntax\n");
 		else if (begin->type == JsonLexer::TokenType::RBRAC)
 			break ;
 		else if (begin->type != JsonLexer::TokenType::COMMA)
-			throw std::runtime_error("invalid array: missing syntax");
+			throw std::runtime_error("invalid array: missing syntax\n");
 	}
 	return arr;
 }
 
 JsonValue	JsonParser::handle_tokens(const_iter& begin, const const_iter& end)
 {
-	try
-	{
+	// try
+	// {
 		switch (begin->type)
 		{
 			case JsonLexer::TokenType::LCURLY:
@@ -75,26 +75,31 @@ JsonValue	JsonParser::handle_tokens(const_iter& begin, const const_iter& end)
 			default:
 				break;
 		}
-	}
-	catch (const std::exception& e)
-	{
-		std::cerr << "error: " << e.what() << std::endl;
-	}
-	throw std::runtime_error("bad token");
+	// }
+	// catch (const std::exception& e)
+	// {
+	// 	std::cerr << "error: " << e.what() << std::endl;
+	// }
+
+	// сatching here would hide errors
+	throw std::runtime_error("bad token\n");
 }
 
 JsonValue	JsonParser::parse(std::ifstream& stream)
 {
 	JsonLexer::Tokens					tokens = JsonLexer::lex(stream);
 	JsonLexer::Tokens::const_iterator	it = tokens.begin();
-	JsonValue							val;
+	// JsonValue							val;
 	try
 	{
-		val = handle_tokens(it, tokens.end());
+		return handle_tokens(it, tokens.end());
+		// val = handle_tokens(it, tokens.end());
 	}
 	catch (const std::exception& e)
 	{
-		std::cerr << "error: " << e.what() << std::endl;
+		//std::cerr << "Parse error: " << e.what() << std::endl;
+		throw; // silently rethrow
 	}
-	return val;
+	// return val;
 }
+// ask @Alexis if we should add \newlines in error messages here

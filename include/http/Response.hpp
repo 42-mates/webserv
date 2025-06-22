@@ -42,7 +42,7 @@ class	Response
 		std::string								readFile(const std::string& filename);
 		std::string								getFileContent(const std::string& url);
 		std::string								getPostContent(const Request& request);
-		std::string								getDeleteContent(const Request& request);
+		std::string								getDeleteContent(const Request& request); // TODO : @Rolf ?
 
 		/* static functions */
 		static std::string						toLower(std::string s);
