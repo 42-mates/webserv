@@ -77,7 +77,15 @@ std::string	Response::directory_listing(const std::string& path, const std::stri
 		{
 			std::string	name = ent->d_name;
 			std::string	icon = (ent->d_type == DT_DIR) ? "folder-icon": "file-icon";
-			items += "<li><span class=\"" + icon + "\"></span><a href=\"" + file + '/' + name + "\">" + name + "</a></li>\n";
+
+            items += "<li><span class=\"" + icon + "\"></span><a href=\"";
+            if (file.empty() || file[file.size() - 1] != '/')
+                items += file + "/";
+            else
+                items += file;
+            items += name + "\">" + name + "</a></li>\n";
+
+			// items += "<li><span class=\"" + icon + "\"></span><a href=\"" + file + '/' + name + "\">" + name + "</a></li>\n";
 		}
 		closedir(dir);
 	}

@@ -13,9 +13,19 @@ def print_headers(cookie=None):
     print()  # blank line to end headers
 
 def print_html(content):
-    print("<html><body>")
+    print("""<html>
+    <head>
+        <title>Cookie Demo</title>
+        <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    </head>
+    <body>""")
     print(content)
     print("</body></html>")
+
+# def print_html(content):
+#     print("<html><body>")
+#     print(content)
+#     print("</body></html>")
 
 def create_form():
     return """
