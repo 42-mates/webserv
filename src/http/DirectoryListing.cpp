@@ -85,7 +85,6 @@ std::string	Response::directory_listing(const std::string& path, const std::stri
                 items += file;
             items += name + "\">" + name + "</a></li>\n";
 
-			// items += "<li><span class=\"" + icon + "\"></span><a href=\"" + file + '/' + name + "\">" + name + "</a></li>\n";
 		}
 		closedir(dir);
 	}
