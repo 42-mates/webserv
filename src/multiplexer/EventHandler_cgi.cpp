@@ -44,9 +44,10 @@ void	EventHandler::handle_environment(const Request& req, const std::string& arg
 		setenv("QUERY_STRING", req.getQueryString().c_str(),1);
 	try
 	{
+		// Takes all HTTP request headers (including "Cookie"), converts them into environment variables (e.g., "HTTP_COOKIE"), and sets them with setenv.
 		for (std::multimap<std::string, std::string>::const_iterator it = req.getHeaders().begin(); it != req.getHeaders().end(); it++)
 		{
-			std::string s(process_header_field(it->first));
+			std::string	s(process_header_field(it->first));
 			setenv(s.c_str(), it->second.c_str(), 1);
 		}
 		if (req.getMethod() == "POST")
@@ -73,13 +74,13 @@ CgiResult	EventHandler::startCGI(int clientFd, std::vector<std::string> argument
 
 	if (pipe(fd) == -1 || pipe(fd_body) == -1)
 	{
-		std::cerr << "Error: could not establish pipe for CGI output\n";
+		std::cerr << "Error: Could not establish pipe for CGI output.\n";
 		return ERROR;
 	}
 	pid = fork();
 	if (pid == -1)
 	{
-		std::cerr << "Error: could not fork process in CGI output\n";
+		std::cerr << "Error: Could not fork process in CGI output.\n";
 		close_all(fd, fd_body);
 		return ERROR;
 	}
