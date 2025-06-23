@@ -97,6 +97,11 @@ std::string	Config::handle_directory(const std::string& s)
 	return current;
 }
 
+bool JsonValue::has_key(const std::string& key) const {
+	validate(JsonType::TOBJECT);
+	return _object->find(key) != _object->end();
+}
+
 Config::Route::Route(const JsonValue& j): dir_listing(true), is_redirection(false)
 {
 	path = j["route"].as_string();
@@ -140,6 +145,7 @@ Config::Route::Route(const JsonValue& j): dir_listing(true), is_redirection(fals
 		method.insert("DELETE");
 	}
 
+	if (j.has_key("cgi")) {
 	try
 	{
 		const JsonValue&	rt = j["cgi"];
@@ -157,11 +163,10 @@ Config::Route::Route(const JsonValue& j): dir_listing(true), is_redirection(fals
 			cgi.insert(el);
 		}
 	}
-	catch (const std::out_of_range& e) {}
 	catch (const std::exception& e)
 	{
 		std::cerr << "CGI: " << e.what() << std::endl;
-		throw e;
+	}
 	}
 }
 

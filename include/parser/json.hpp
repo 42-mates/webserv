@@ -89,6 +89,7 @@ class	JsonValue
 
 		const array_type&		get_arr() const { return (*_array); };
 		const object_type&		get_obj() const { return (*_object); };
+		bool					has_key(const std::string& key) const;
 
 	private:
 		union
