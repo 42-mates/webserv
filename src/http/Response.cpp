@@ -20,8 +20,8 @@ Response::Response(Request const &request, Config const &config):
 			_statusCode = 301;
 		else if (request.getMethod() == "POST")
 			_content = getPostContent(request);
-		// else if (request.getMethod() == "DELETE")
-		// 	_content = getDeleteContent(request);
+		else if (request.getMethod() == "DELETE")
+			_content = getDeleteContent(request);
 		else if (check_extension(request.getUrl()))
 			throw(502);
 		else
@@ -267,19 +267,54 @@ std::string	Response::getPostContent(const Request& request)
 	return content.str();
 }
 
-// std::string Response::getDeleteContent(const Request& request)
-// {
-// 	std::ostringstream	content;
-// 	std::string			path = "./";
-
-// 	// Check path
-// 	// Not under ./website or ./upload:
-// 	if (.find("./website") != 0 && resolved.find("./upload") != 0)
-// 		throw 403;
-// 	// Files don't exist
-// 	// Deletion failed
-// 	return content.str();
-// }
+std::string Response::getDeleteContent(const Request& request)
+{
+	std::ostringstream	content;
+	std::string			path;
+	std::string			url = request.getUrl();
+	
+	// Build the complete file path
+	if (_routes.directory.empty())
+		path = "./website" + url;
+	else
+		path = _routes.directory + url;
+	
+	try
+	{
+		// Security: check that path is within authorized directories
+		if (path.find("./website") != 0 && path.find("./upload") != 0)
+			throw 403; // Forbidden - attempt to access outside authorized zone
+		
+		// Check that file exists before deletion
+		if (access(path.c_str(), F_OK) != 0)
+			throw 404; // Not Found - file does not exist
+		
+		// Check deletion permissions
+		if (access(path.c_str(), W_OK) != 0)
+			throw 403; // Forbidden - no write permission
+		
+		// Delete the file
+		if (unlink(path.c_str()) != 0)
+			throw 500; // Internal Server Error - deletion failed
+		
+		// Success: return confirmation message
+		_statusCode = 204; // No Content (deletion successful)
+		content << "File " << url << " deleted successfully\r\n";
+	}
+	catch(int statusCode)
+	{
+		_statusCode = statusCode;
+		content << getErrorContent(_statusCode);
+	}
+	catch(const std::exception& e)
+	{
+		std::cerr << "Delete Error: " << e.what() << '\n';
+		_statusCode = 500;
+		content << getErrorContent(_statusCode);
+	}
+	
+	return content.str();
+}
 
 // return the iterator of cgi found in the current _routes
 std::map<std::string, std::string>::const_iterator	Response::check_cgi(const Config::Route& route, const std::string& url)
