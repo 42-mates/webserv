@@ -12,6 +12,10 @@ FINAL GRADE: ---/100
 
 The server supports the **GET**, **POST**, and **DELETE** methods, serves static websites, allows file uploads, and is compatible with modern browsers. Configuration is done through a JSON-based file, inspired by the structure of NGINX, allowing specification of ports, hosts, server names, error pages, client body size limits, and route-specific behaviors (e.g., allowed methods, redirection, directory listing, CGI execution).
 
+<p align="center">
+  <img src="assets/http_server.png" alt="HTTP-server" />
+</p>
+
 ## 🚀 Features
 - Non-blocking I/O using a single `epoll()`
 - Support for multiple ports and virtual servers
