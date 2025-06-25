@@ -1,137 +1,60 @@
-# Webserv
-A HTTP/1.1 server in C++ 98, designed to handle HTTP requests, responses, and dynamic content generation through CGI scripts.
+![Webserv](https://img.shields.io/badge/Webserv-HTTP%20Server-blue?style=for-the-badge&logo=appveyor)
+![C++](https://img.shields.io/badge/C++-98-blue?style=for-the-badge&logo=appveyor)
+![HTTP](https://img.shields.io/badge/HTTP-1.1-blue?style=for-the-badge&logo=appveyor)
+# webserv
+```
+FINAL GRADE: ---/100
+```
+**Made by:** **[@kyeh](https://github.com/kyeh)**, **[@rogalio](https://github.com/rogalio)**, **[@oprosvir](https://github.com/oprosvir)**  
 
-## Grok: Where to start
-Roadmap given by AI Grok:
-<br>
-<br>
-<details>
-  <summary>
-    
-### Step 1: Understand the Foundations
-Before jumping into coding, you need to grasp the concepts and tools involved. This will save you headaches later.
-  </summary>
+## 📖 Project Description
+**Webserv** is a fully functional HTTP server written in **C++98**, designed to deepen understanding of network programming and the HTTP protocol. This project involves implementing essential web server functionality from scratch, including handling connections, parsing HTTP requests, generating responses, and supporting configuration-based behavior.
 
-#### 1. Learn What an HTTP Server Does
-- Read about HTTP basics (requests, responses, status codes, headers). Start with something simple like [MDN’s HTTP Overview](https://developer.mozilla.org/en-US/docs/Web/HTTP/Overview).
-- Focus on HTTP 1.1 since NGINX is your reference, and the project mentions it. Key topics: GET, POST, DELETE methods, status codes (e.g., 200 OK, 404 Not Found), and headers (e.g., Content-Length).
-#### 2. Study the RFC 2616 (HTTP 1.1)
-- The project says to read the RFC (Request for Comments). RFC 2616 is the official spec for HTTP 1.1. It’s dense, so don’t try to memorize it—just skim it to understand request/response formats, methods, and how servers should behave. You can find it online (e.g., [ietf.org](https://datatracker.ietf.org/doc/html/rfc2616)).
-- Pay attention to Sections 5 (Request), 6 (Response), and 9 (Methods).
-#### 3. Experiment with Telnet and NGINX
-- The project suggests testing with Telnet and NGINX. Why? To see HTTP in action. <br>
-  - Install NGINX locally (e.g., `sudo apt install nginx` on Linux).
-  - Start NGINX and visit `localhost` in your browser to see a basic static site.
-  - Use Telnet (`telnet localhost 80`), type `GET / HTTP/1.1` then hit Enter twice, and watch the raw HTTP response. This shows you how a server talks to clients.
-- Compare NGINX’s behavior (headers, error pages) to what you’ll need to implement.
-#### 4. Brush Up on C++ 98 and Systems Programming
-- Since you’re restricted to C++ 98, review its basics (no modern C++11+ features like `auto` or smart pointers). Focus on classes, manual memory management (`new`/`delete`), and standard libraries.
-- Learn the allowed system calls (e.g., `socket`, `accept`, `poll`, `read`, `write`). These are POSIX functions for networking and I/O—check their man pages (e.g., `man 2 socket` on Linux).
-</details>
+The server supports the **GET**, **POST**, and **DELETE** methods, serves static websites, allows file uploads, and is compatible with modern browsers. Configuration is done through a JSON-based file, inspired by the structure of NGINX, allowing specification of ports, hosts, server names, error pages, client body size limits, and route-specific behaviors (e.g., allowed methods, redirection, directory listing, CGI execution).
 
-<br><br>
----
-<br>
-<details>
-  <summary>
- 
-### Step 2: Plan Your Project Structure
-Break the project into components based on the requirements. This will guide your coding later.    </summary>
+## 🚀 Features
+- Non-blocking I/O using a single `epoll()`
+- Support for multiple ports and virtual servers
+- Default error handling and file serving
+- Integration with CGI scripts
+- Stress-resilience: the server must remain available under heavy load
 
-#### 1. Configuration Parser
-- Your server takes a config file (like NGINX’s `nginx.conf`). Plan to write a parser that reads this file and stores settings (e.g., port, host, routes, error pages).
-- Start simple: a file with a `port` and `root` directory for static files.
-#### 2.Networking Core
-- Use `socket`, `bind`, `listen`, and `accept` to handle incoming connections.
-- Implement non-blocking I/O with `poll()` (or `select()` if you prefer). This is the heart of the server—all I/O must go through it.
-#### 3.HTTP Request/Response Handling
-- Parse incoming HTTP requests (method, path, headers).
-- Generate responses (status line, headers, body) based on the request and config.
-#### 4.Static File Serving
-- Serve files from a directory (e.g., `/tmp/www/index.html`) for GET requests.
-#### 5.CGI Support
-- Handle dynamic content (e.g., PHP scripts) using `fork`, `execve`, and pipes. This is for later, but plan for it.
-#### 6.Error Handling and Resilience
-- Default error pages (e.g., 404, 500).
-- Ensure the server doesn’t crash under stress or bad requests.
-</details>
+### ✨ Bonus Features
+- ✅Cookie and session handling
+- ✅Multiple CGI support
 
-<br><br>
----
-<br>
-<details>
-  <summary>
- 
-### Step 3: Set Up Your Environment
-Get your tools ready so you can test as you go.     </summary>
+### Configuration Directives
 
-#### 1. Development Setup
-- Use a Linux/Unix-like system (e.g., Ubuntu) since the system calls (e.g., `poll`, `epoll`) work best there.
-- Install a C++ 98 compiler (e.g., `g++ -std=c++98`).
-- Set up a basic `Makefile` with `all`, `clean`, `fclean`, and `re` targets.
-#### 2. Testing Tools
-- Browser (e.g., Chrome) to test compatibility.
-- `curl` or `wget` for command-line requests.
-- Telnet for raw HTTP testing.
-- A simple static site (e.g., an `index.html` file) to serve initially.
-</details>
+| Directive | Description | Example |
+|-----------|-------------|---------|
+| 🔧 **Server-level directives** |  |  |
+| `name` | Server name (optional) | `"name": "main server"` |
+| `host` | Address to bind the server to | `"host": "0.0.0.0"` |
+| `port` | Port to listen on | `"port": 8080` |
+| `max_body` | Request body limit | `"max_body": 1000000` |
+| `error` | Custom error pages | `"error": { "404": "./error/404.html" }` |
+| `routes` | Array of route definitions | `"routes": [ { ... }, { ... } ]` |
+| 🛣 **Route-level directives** | | |
+| `route` | Path to match in the URL | `"route": "/about"` |
+| `method` | Allowed HTTP methods | `"methods": ["GET", "POST"]` |
+| `directory` | Physical path to serve files from | `"directory": "./website"` |
+| `index` | Default file to serve if the request points to a directory | `"index": "index.html"` |
+| `dir_listing` | Enable or disable directory listing | `"dir_listing": true` |
+| `upload` | Directory where uploaded files should be stored | `"upload": "./upload"` |
+| `redirection` | URL to redirect requests to | `"redirection": "https://example.com"` |
+| `cgi` | List of CGI interpreters for specific extensions | `"cgi": [ { "extension": "py", "exec": "/usr/bin/python3" } ] ` |
 
-<br><br>
----
-<br>
-<details>
-  <summary>
- 
-### Step 4: Start Coding (Baby Steps)
-Begin with the simplest working version and build up.
-  </summary>
+## 📦 Installation
 
-#### 1. Minimal Server (Hello World)
-- Write a program that:
-  - Creates a socket (`socket()`).
-  - Binds it to a port (`bind()`, e.g., 8080).
-  - Listens for connections (`listen()`).
-  - Accepts a client (`accept()`).
-  - Sends a hardcoded "HTTP/1.1 200 OK" response with "Hello, World!" as the body.
-- Test it with curl `localhost:8080`.
-#### 2. Add Non-Blocking I/O with poll()
-- Make sockets non-blocking (`fcntl(sockfd, F_SETFL, O_NONBLOCK)`).
-- Use `poll()` to handle multiple clients without blocking.
-#### 3. Parse a Config File
-- Start with a basic file (e.g., port 8080; root ./www;) and read it line-by-line.
-#### 4. Serve a Static File
-- Replace the "Hello, World!" with contents of an `index.html` file using `open` and `read`.
-</details>
+- **System**: Linux
 
-<br><br>
----
-<br>
-<details>
-  <summary>
- 
-### Step 5: Iterate and Expand
-Once the basics work, add features incrementally.
-  </summary>
-  
-1. Parse HTTP requests properly.<br>
-2. Support GET, POST, DELETE methods.<br>
-3. Handle file uploads (POST).<br>
-4. Add CGI for dynamic content.<br>
-5. Implement multiple ports and routes from the config.
-</details>
+```bash
+git clone https://github.com/42-mates/webserv.git && cd webserv && make
+```
+```bash
+# Run with default configuration
+./webserv
 
-<br><br>
----
-<br>
-
-### Tips to Succeed
-1. **Read the Man Pages**: For every system call (e.g., `man 2 poll`), understand arguments and return values.
-2. **Test Early, Test Often**: Use `curl`, browsers, and stress tests (e.g., Python scripts sending tons of requests).
-3. **Compare with NGINX**: When in doubt, see how NGINX handles a request or config setting.
-4. **Debugging**: Use `strerror(errno)` for errors, but remember not to check `errno` after I/O calls per the rules.
-5. **Time Management**: This project is big—start small and aim to finish core features first (static serving, config parsing).
-</details>
-
-<br><br>
-##### Resources
-- [`Reference`](https://github.com/BenjaminHThomas/WebServer) <br>
+# Or specify a custom config file
+./webserv config/redirection.json
+```
