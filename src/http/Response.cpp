@@ -143,7 +143,7 @@ std::string	Response::getErrorContent(int errCode)
 		content.append("<html><body>");
 		content.append("<h2>Oops! Got an error: </h2><h1>");
 		content.append(_statusCodes.at(_statusCode));
-		content.append("</h1></body></html>");
+		content.append("</h1></body></html>\n");
 	}
 	catch(const std::exception& e)
 	{
@@ -151,7 +151,7 @@ std::string	Response::getErrorContent(int errCode)
 		content.append("<html><body>");
 		content.append("<h2>Oops! Got an error: </h2><h1>");
 		content.append(_statusCodes.at(_statusCode));
-		content.append("</h1></body></html>");
+		content.append("</h1></body></html>\n");
 	}
 	return content;
 }
