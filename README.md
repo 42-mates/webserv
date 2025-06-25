@@ -27,7 +27,7 @@ The server supports the **GET**, **POST**, and **DELETE** methods, serves static
 - ✅Cookie and session handling
 - ✅Multiple CGI support
 
-### Configuration Directives
+### 🔧 Configuration Directives
 
 | Directive | Description | Example |
 |-----------|-------------|---------|
@@ -48,17 +48,31 @@ The server supports the **GET**, **POST**, and **DELETE** methods, serves static
 | `redirection` | URL to redirect requests to | `"redirection": "https://example.com"` |
 | `cgi` | List of CGI interpreters for specific extensions | `"cgi": [ { "extension": "py", "exec": "/usr/bin/python3" } ] ` |
 
-## 📦 Installation
+## 📦 Installation & Usage
 
-- **System**: Linux
+🖥️ **System:** Linux
+
+🛠️ **Requirements:** C++98 compiler, Make
 
 ```bash
-git clone https://github.com/42-mates/webserv.git && cd webserv && make
+git clone https://github.com/42-mates/webserv.git
+cd webserv
+make
 ```
+- Run in foreground:
 ```bash
-# Run with default configuration
+# with default configuration
 ./webserv
 
-# Or specify a custom config file
+# with a custom configuration file
 ./webserv config/redirection.json
 ```
+This will show server logs directly in the terminal.
+To interact with the server (e.g., using `curl` or browser), open **another terminal**.
+
+- Run in background:
+```bash
+./webserv config/config.json &
+```
+This runs the server in the background, allowing you to use the same terminal for other tasks.
+Use `fg` or `kill` if you need to bring it back or stop it.
