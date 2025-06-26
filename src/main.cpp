@@ -35,6 +35,7 @@ int	main(int ac, char** av)
 	try
 	{
 		signal(SIGINT, handle_sigint);
+		signal(SIGTERM, handle_sigint);
 		signal(SIGPIPE, SIG_IGN);
 		JsonValue	json = JsonParser::parse(input);
 		std::cout << json << std::endl;
