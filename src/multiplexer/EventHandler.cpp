@@ -339,8 +339,9 @@ void	EventHandler::generateResponse(int clientFd)
 		{
 			Response rsp(*rqs, conf);
 			s = rsp.generateResponse();
+			std::string headerOnly = s.substr(0, s.find("\r\n\r\n"));
 			std::cout << "\n=== Response to client " << clientFd << " ===\n";
-			std::cout << s << "\n===============================\n";
+			std::cout << headerOnly << "\n===============================\n";
 		}
 		_clients.at(clientFd)->_responseBuffer.append(s);
 		delete rqs;
