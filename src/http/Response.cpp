@@ -274,11 +274,24 @@ std::string Response::getDeleteContent(const Request& request)
 	std::string			url = request.getUrl();
 	
 	// Build the complete file path
-	if (_routes.directory.empty())
-		path = "./website" + url;
+	if (url.find("/upload/") == 0)
+	{
+		std::string relative = url.substr(std::string("/upload").length());
+		if (!relative.empty() && relative[0] == '/')
+			relative = relative.substr(1);
+		path = _routes.upload;
+		if (!path.empty() && path[path.length() - 1] != '/')
+			path += "/";
+		path += relative;
+	}
 	else
-		path = _routes.directory + url;
-	
+	{
+		path = _routes.directory;
+		if (!path.empty() && path[path.length() - 1] != '/' && url[0] != '/')
+			path += "/";
+		path += url;
+	}
+
 	try
 	{
 		// Security: check that path is within authorized directories
@@ -299,6 +312,7 @@ std::string Response::getDeleteContent(const Request& request)
 		
 		// Success: return confirmation message
 		_statusCode = 204; // No Content (deletion successful)
+		std::cout << "[DELETE] Deleted: " << path << std::endl;
 		content << "File " << url << " deleted successfully\r\n";
 	}
 	catch(int statusCode)
