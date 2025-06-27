@@ -106,7 +106,13 @@ CgiResult	EventHandler::startCGI(int clientFd, std::vector<std::string> argument
 	}
 	else
 	{
-		write(fd_body[1], req.getBody().c_str(), req.getBody().size());
+		ssize_t	bytes_written = write(fd_body[1], req.getBody().c_str(), req.getBody().size());
+		if (bytes_written <= 0)
+		{
+			std::cerr << "CHECK HERE FOR SURE IF YOU EVER GET THIS DURING DEBUG" << std::endl;
+			remove_client(clientFd);
+			return ERROR;
+		}
 		close(fd[1]);
 		close(fd_body[0]);
 		close(fd_body[1]);
