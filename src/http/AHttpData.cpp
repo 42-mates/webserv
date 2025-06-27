@@ -40,63 +40,72 @@ const std::string&	AHttpData::getBody() const
 const std::string&	AHttpData::getRaw() const
 {return this->_raw;}
 
-// Parse headers (key, value)
+// Parse headers (key: value pairs) from HTTP data
 bool	AHttpData::parseHeaders()
 {
 	std::string::const_iterator	it = _raw.begin();
 	std::string::const_iterator	end = _raw.end();
 
-	// If the concrete class is a Request, offset to the 2nd line
-	// 	跳過第一行（請求行，例如 GET /index.html HTTP/1.1），從第二行開始處理，
-	// 	因為第二行才是頭字段的開始（例如 Host: kyeh.42.fr）
+	// If parsing a Request, skip the first line (request line)
+	// Example: "GET /index.html HTTP/1.1" - this is not a header
+	// Headers start from the second line (e.g., "Host: localhost")
 	if (_isRequest)
 	{
-		it = std::find(it, end, '\n');	// Move to the end of first line
+		it = std::find(it, end, '\n');	// Move to end of first line
 		if (it == end)
 			return false;
-		++it;
+		++it;  // Start from second line
 	}
 
-	// Check if the header ends correctly (\r\n\r\n: HTTP 標準的頭字段結束標記，參考 RFC 7230)
+	// Check if headers end correctly with \r\n\r\n (HTTP standard, RFC 7230)
 	std::string::size_type	headerEnd = _raw.find("\r\n\r\n");
 	if (headerEnd == std::string::npos)
 	{
-		headerEnd = _raw.find("\n\n");	//兼容非標準的換行格式，增加容錯性。
+		// Also check for \n\n for compatibility with non-standard formats
+		headerEnd = _raw.find("\n\n");
 		if (headerEnd == std::string::npos)
-			return false;
+			return false;  // No header end marker found
 	}
 
-	// Verify the header's structure
+	// Verify header structure (must have at least one valid header)
 	std::string				headerSection = _raw.substr(std::distance(_raw.begin(), it), headerEnd);
 	std::string::size_type	firstColon = headerSection.find(':');
 	std::string::size_type	firstNewline = headerSection.find('\n');
 
 	if (firstColon == std::string::npos || (firstNewline != std::string::npos && firstColon > firstNewline))
 		return false;
+	
+	// Parse each header line
 	while (it != end)
 	{
-		// End of line
+		// Find end of current line
 		std::string::const_iterator	line_end = std::find(it, end, '\n');
-		// Empty line or line of whitespaces
+		// Check for empty line (end of headers)
 		if (line_end == it || (line_end != end && *(line_end - 1) == '\r' && line_end - 1 == it))
-			break ;
+			break;  // Empty line marks end of headers
+		
+		// Find colon separator between key and value
 		std::string::const_iterator	colon = std::find(it, line_end, ':');
-		if (colon == line_end)	// Invalid line: no colon. Skip and continue
+		if (colon == line_end)	// Invalid header: no colon found
 		{
 			it = line_end + 1;
-			continue ;
+			continue;  // Skip invalid line
 		}
 
-		std::string	key(it, colon);
-		std::string	value(colon + 1, line_end);
+		// Extract key and value
+		std::string	key(it, colon);           // e.g., "Content-Type"
+		std::string	value(colon + 1, line_end); // e.g., " text/html"
+		// Remove whitespace
 		key = trim(key);
 		value = trim(value);
+		// Remove trailing \r if present
 		if (!value.empty() && value[value.length() - 1] == '\r')
 			value.erase(value.length() - 1);
+		// Store header if key is not empty
 		if (!key.empty())
 			_headers.insert(std::pair<std::string, std::string>(key,value));
 		// std::cout << "Key: [" << key << "] | Value: [" << value << "]" << std::endl;
-		it = line_end + 1;
+		it = line_end + 1;  // Move to next line
 	}
 
 	// Parese the body if there's any
