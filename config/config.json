@@ -2,6 +2,7 @@
 	{
 		"name": "first server",
 		"host": "0.0.0.0",
+		"hostnames": ["first.test"],
 		"port": 8080,
 		"max_body": 10000000,
 		"error": {
@@ -47,6 +48,7 @@
 	{
 		"name": "second server",
 		"host": "0.0.0.0",
+		"hostnames": ["second.test"],
 		"port": 8081,
 		"error":
 		{"404": "./error-page/not_found_404.html"},
@@ -66,6 +68,7 @@
 	{
 		"name": "random server",
 		"host": "0.0.0.0",
+		"hostnames": ["random.test"],
 		"port": 9999,
 		"error":
 		{"404": "./error-page/not_found_404.html"},
