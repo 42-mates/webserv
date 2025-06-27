@@ -39,33 +39,46 @@ const std::string&	Request::getQueryString() const
 
 void	Request::parseHead()
 {
+	// Parse the first line of HTTP request: "GET /index.html?search=test HTTP/1.1"
+	//                                         ↑    ↑                       ↑
+	//                                      method  URL + query string    version
+
 	/* Parse Method */
+	// Find first space after method (e.g., "GET ")
 	std::size_t	mtd_end = _raw.find(" ");
 	if (mtd_end == std::string::npos)
 		throw std::runtime_error("Method Not Found.\n");
-	_method = _raw.substr(0, mtd_end);
+	_method = _raw.substr(0, mtd_end);  // Extract "GET", "POST", or "DELETE"
 
 	/* Parse URL */
+	// Skip spaces and find URL start
 	std::size_t	url_start = _raw.find_first_not_of(" ", mtd_end + 1);
 	if (url_start == std::string::npos)
 		throw std::runtime_error("URL Not Found.\n");
+	// Find space after URL (before HTTP version)
 	std::size_t url_end = _raw.find(" ", url_start);
 	if (url_end == std::string::npos)
 		throw std::runtime_error("URL Not Found.\n");
-	_url = _raw.substr(url_start, url_end - url_start);
+	// Extract full URL (may include query string)
+	_url = _raw.substr(url_start, url_end - url_start);  // e.g., "/index.html?search=test"
+	
+	// Check if URL contains query string (parameters after '?')
 	std::size_t query_start = _url.find('?');
 	if (query_start != std::string::npos)
-		_query_string = _url.substr(query_start + 1);
-	_url = _url.substr(0, query_start);
+		_query_string = _url.substr(query_start + 1);  // Extract "search=test"
+	_url = _url.substr(0, query_start);  // Keep only "/index.html"
 
 	/* Parse HTTP version */
+	// Find "HTTP/" in the request line
 	std::size_t http_start = _raw.find_first_of("HTTP/", url_end + 1);
 	if (http_start == std::string::npos)
 		throw std::runtime_error("HTTP version Not Found.\n");
+	// Find end of line (version ends at newline)
 	std::size_t http_end = _raw.find('\n', http_start);
 	if (http_end == std::string::npos)
 		throw std::runtime_error("HTTP version Not Found.\n");
-	_http_version = _raw.substr(http_start, http_end - http_start);
+	_http_version = _raw.substr(http_start, http_end - http_start);  // Extract "HTTP/1.1"
+	// Remove trailing \r if present (handles both \r\n and \n line endings)
 	if (!_http_version.empty() && _http_version[_http_version.length() - 1] == '\r')
 		_http_version.erase(_http_version.length() - 1);
 }

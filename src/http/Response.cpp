@@ -9,21 +9,29 @@ Response::Response(Config const &config, int errCode):
 Response::Response(Request const &request, Config const &config):
 	_statusCode(200), _contentType("text/html"), _config(config)
 {
+	// Find the best matching route for this URL
 	_routes = find_match(_config, request.getUrl());
 	try
 	{
+		// Check if HTTP method is allowed for this route
 		if (!std::count(_routes.method.begin(), _routes.method.end(), request.getMethod()))
-			throw(405);
+			throw(405);  // Method Not Allowed
+		// Only support HTTP/1.1
 		else if (request.getHttpVersion() != "HTTP/1.1")
-			throw(505);
+			throw(505);  // HTTP Version Not Supported
+		// Handle redirections (301 Moved Permanently)
 		else if (_routes.is_redirection == true)
 			_statusCode = 301;
+		// Handle POST requests (file uploads)
 		else if (request.getMethod() == "POST")
 			_content = getPostContent(request);
+		// Handle DELETE requests (file deletion)
 		else if (request.getMethod() == "DELETE")
 			_content = getDeleteContent(request);
+		// Check if this is a CGI request (.py, .php)
 		else if (check_extension(request.getUrl()))
-			throw(502);
+			throw(502);  // Bad Gateway (CGI will be handled separately)
+		// Default: GET request for static files
 		else
 			_content = getFileContent(request.getUrl());
 	}
@@ -82,23 +90,31 @@ const Config::Route&	Response::find_match(const Config& config, const std::strin
 
 std::string	Response::generateResponse()
 {
+	// Build complete HTTP response with headers and body
 	std::ostringstream	response;
 
+	// Status line: "HTTP/1.1 200 OK\r\n"
 	response << "HTTP/1.1 " << _statusCodes.at(_statusCode) << "\r\n";
+	// Add Location header for redirections
 	if (_routes.is_redirection)
 		response << "Location: " << _routes.redirection << "\r\n";
+	// Essential headers
 	response << "Content-Type: " << _contentType << "\r\n";
 	response << "Content-Length: " << _content.length() << "\r\n";
 	response << "Date: " << getCurrentTime(STANDARD) << "\r\n";
 	response << "Server: 3GoatServer/1.0\r\n";
+	// Close connection for 413 Payload Too Large
 	if (_statusCode == 413)
 		response << "Connection: close\r\n";
 	// else
 	// 	response << "Connection: keep-alive\r\n";
+	// Add any extra headers from CGI
 	if (!_extraHeaders.empty())
 		for (std::multimap<std::string, std::string>::iterator	it = _extraHeaders.begin(); it != _extraHeaders.end(); ++it)
 			response << it->first << ": " << it->second << "\r\n";
+	// Empty line between headers and body
 	response << "\r\n";
+	// Add response body
 	response << _content;
 	return response.str();
 }
@@ -158,24 +174,28 @@ std::string	Response::getErrorContent(int errCode)
 
 std::string	Response::getFileContent(const std::string& url)
 {
+	// Convert URL path to actual file path on disk
 	std::string	filename;
 	std::string	appended;
-	std::string	file = url.substr(_routes.path.length());
+	std::string	file = url.substr(_routes.path.length());  // Remove route prefix
 
-	// Check if going to upload
+	// Check if accessing upload directory
 	if (file.find("upload/") == 0)
 	{
+		// Build path: upload_directory + filename
 		filename = _routes.upload;
 		if (*filename.rbegin() != '/')
 			filename += "/";
-		filename += file.substr(7);
+		filename += file.substr(7);  // Remove "upload/" prefix
 	}
-	// Otherwise goes to website
+	// Otherwise accessing website directory
 	else
 	{
+		// Build path: root_directory + file
 		filename = _routes.directory;
 		if (file != "/")
 		{
+			// Avoid double slashes in path
 			if (*file.begin() == '/' && *filename.rbegin() == '/')
 				filename += file.substr(1);
 			else
@@ -234,23 +254,28 @@ std::string	Response::getFileContent(const std::string& url)
 
 std::string	Response::getPostContent(const Request& request)
 {
+	// Handle POST requests (file uploads)
 	std::ostringstream	content;
 	std::string			filename;
 	std::string			path = _routes.upload;
 
-
+	// Ensure upload path ends with '/'
 	if (*path.rbegin() != '/')
 		path.append("/");
 	try
 	{
-		_contentType = request.getHeaderValue("Content-Type");	// Throw outof range if no content_type in request
-		filename = getCurrentTime(SIMPLE) + check_postFile(_contentType); // throw 403 if not allowed file format
+		// Get Content-Type from request headers
+		_contentType = request.getHeaderValue("Content-Type");	// Throw out_of_range if no content_type
+		// Generate unique filename: timestamp + extension based on MIME type
+		filename = getCurrentTime(SIMPLE) + check_postFile(_contentType); // throw 403 if not allowed
 		path += filename;
+		// Create/overwrite file
 		std::ofstream	ofs(path.c_str(), std::ofstream::out | std::ofstream::trunc);
 		if (!ofs)
 			throw (401); // Not authorized to create a file
+		// Write request body to file
 		ofs << request.getBody();
-		_statusCode = 201;
+		_statusCode = 201;  // Created
 		content << filename << " is created successfully at [" << _routes.upload << "]\r\n";
 	}
 	catch(int statusCode)
@@ -261,7 +286,7 @@ std::string	Response::getPostContent(const Request& request)
 	catch(const std::exception& e)
 	{
 		std::cerr << "Other Post Error: " << e.what() << '\n';
-		_statusCode = 400;
+		_statusCode = 400;  // Bad Request
 		content << getErrorContent(_statusCode);
 	}
 	return content.str();
@@ -357,10 +382,11 @@ std::map<std::string, std::string>::const_iterator	Response::check_cgi(const Con
 
 std::string	Response::check_postFile(const std::string& type)
 {
+	// Validate Content-Type and return appropriate file extension
 	if (type.empty())
-		// missing content-type header in the request
-		throw (400); //Bad request
-	if (_acceptedFile.count(type) > 0)
+		// Missing Content-Type header in the request
+		throw (400); // Bad Request
+	if (_acceptedFile.count(type) > 0)  // Check if MIME type is allowed
 		return _acceptedFile.at(type);
 	else
 		throw (403); //Forbidden file type
