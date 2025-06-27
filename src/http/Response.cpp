@@ -121,6 +121,29 @@ std::string	Response::generateResponse()
 
 std::string	Response::readFile(const std::string& filename)
 {
+	/* This is supposed to check that if only the owner of the file has the right to read, it returns 403.
+	 * Since you're always the user who starts the server and uses the browser/terminal,
+	 * you'll always have the access to the file if you use access below to check.
+	 * But you can't use sudo to mimic another user to test this code block.*/
+	// // Get file status
+    // struct stat fileStat;
+    // if (stat(filename.c_str(), &fileStat) != 0) {
+    //     std::cerr << "Stat failed for file: " << filename << ", errno: " << errno << std::endl;
+    //     throw 500; // Internal Server Error
+    // }
+
+    // // Check rights: (mode & 0400) and that others don't have the right ((mode & 0044) == 0)
+    // mode_t mode = fileStat.st_mode;
+    // if ((mode & S_IRUSR) && !(mode & (S_IRGRP | S_IROTH))) {
+    //     uid_t euid = geteuid();
+    //     if (euid != fileStat.st_uid) {
+    //         std::cerr << "File " << filename << " restricted to owner " << fileStat.st_uid << ", current EUID: " << euid << std::endl;
+    //         throw 403; // Forbidden for non-owner
+    //     }
+    // } else if (access(filename.c_str(), R_OK) != 0) {
+    //     std::cerr << "No read permission for file: " << filename << ", errno: " << errno << std::endl;
+    //     throw 403; // Forbidden - no read permission
+    // }
 	if (access(filename.c_str(), R_OK) != 0) {
 		if (errno == EACCES)
 			throw 403;
