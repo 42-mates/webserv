@@ -3,7 +3,7 @@
 ![HTTP](https://img.shields.io/badge/HTTP-1.1-blue?style=for-the-badge&logo=appveyor)
 # webserv
 ```
-FINAL GRADE: ---/100
+FINAL GRADE: 125/100
 ```
 **Made by:** **[@kyeh](https://github.com/kyeh)**, **[@rogalio](https://github.com/rogalio)**, **[@oprosvir](https://github.com/oprosvir)**  
 
