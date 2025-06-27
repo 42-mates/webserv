@@ -71,6 +71,13 @@ std::string	Response::directory_listing(const std::string& path, const std::stri
 	DIR*		dir;
 	dirent*		ent;
 
+    if (access(path.c_str(), X_OK) != 0) {
+		if (errno == EACCES)
+			return "<html><head><title>403 Forbidden</title></head><body><h1>403 Forbidden</h1></body></html>";
+		else
+			return "<html><head><title>500 Internal Server Error</title></head><body><h1>500 Internal Server Error</h1></body></html>";
+	}
+
 	if ((dir = opendir(path.c_str())) != NULL)
 	{
 		while ((ent = readdir(dir)) != NULL)

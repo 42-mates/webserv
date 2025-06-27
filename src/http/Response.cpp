@@ -121,9 +121,17 @@ std::string	Response::generateResponse()
 
 std::string	Response::readFile(const std::string& filename)
 {
+	if (access(filename.c_str(), R_OK) != 0) {
+		if (errno == EACCES)
+			throw 403;
+		else if (errno == ENOENT)
+			throw 404;
+		else
+			throw 500;
+	}
 	std::ifstream	ifs(filename.c_str());
 	if (!ifs)
-		throw 404;
+		throw std::runtime_error("Failed to open file: " + filename);
 	std::string		content;
 	std::string		line;
 	while (std::getline(ifs, line))
