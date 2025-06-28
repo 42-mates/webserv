@@ -248,7 +248,7 @@ std::string	Response::getFileContent(const std::string& url)
 				content = readFile(appended);
 			}
 			// If the default page index.html is not there, we give the list of directories.
-            // If dir_listing is set to false, then it gives 403 Forbidden.
+			// If dir_listing is set to false, then it gives 403 Forbidden.
 			catch (int)
 			{
 				if (!_routes.dir_listing)

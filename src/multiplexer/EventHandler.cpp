@@ -63,7 +63,7 @@ void	EventHandler::changeToWrite(int clientFd)
 	ev.data.fd = clientFd;
 	ev.events = EPOLLOUT;		// Writable
 	if (epoll_ctl(_epollFd, EPOLL_CTL_MOD, clientFd, &ev) == -1)
-		std::cerr << "Error: Can't mark fd " << clientFd << " as EPOLLOUT\n";
+		std::cerr << "Error: Can't mark fd " << clientFd << " as EPOLLOUT.\n";
 }
 
 bool	EventHandler::addToEpoll(int fd)
@@ -75,7 +75,7 @@ bool	EventHandler::addToEpoll(int fd)
 	ev.events = EPOLLIN;
 	if (epoll_ctl(_epollFd, EPOLL_CTL_ADD, fd, &ev) == -1)
 	{
-		std::cerr << "Error: Cant not mark fd " << fd << " as EPOLLIN\n";
+		std::cerr << "Error: Cant not mark fd " << fd << " as EPOLLIN.\n";
 		return false;
 	}
 	return true;

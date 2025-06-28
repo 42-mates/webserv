@@ -77,6 +77,8 @@ CgiResult	EventHandler::startCGI(int clientFd, std::vector<std::string> argument
 		std::cerr << "Error: Could not establish pipe for CGI output.\n";
 		return ERROR;
 	}
+	int	flags = fcntl(fd_body[1], F_GETFL, 0);
+	fcntl(fd_body[1], F_SETFL, flags | O_NONBLOCK);
 	pid = fork();
 	if (pid == -1)
 	{
@@ -106,26 +108,18 @@ CgiResult	EventHandler::startCGI(int clientFd, std::vector<std::string> argument
 	}
 	else
 	{
+		/* To fix:
+		 *	This write is not checked by epoll nor protected (removing client upon error).
+		 *	It writes the info to CGI, so don't have to manage the client.
+		*/
 		write(fd_body[1], req.getBody().c_str(), req.getBody().size());
-		/**
-		 * this decision don't pass the tester checkers
-		 * 
-		 */		
-		
-		// ssize_t	bytes_written = write(fd_body[1], req.getBody().c_str(), req.getBody().size());
-		// if (bytes_written <= 0)
-		// {
-		// 	std::cerr << "CHECK HERE FOR SURE IF YOU EVER GET THIS DURING DEBUG" << std::endl;
-		// 	remove_client(clientFd);
-		// 	return ERROR;
-		// }
 		close(fd[1]);
 		close(fd_body[0]);
 		close(fd_body[1]);
 		time_t	start_time = std::time(NULL);
 		while (1)
 		{
-			int status;
+			int	status;
 			pid_t	result = waitpid(pid, &status, WNOHANG);
 			if (result < 0)
 			{
