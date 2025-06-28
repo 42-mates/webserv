@@ -77,8 +77,6 @@ CgiResult	EventHandler::startCGI(int clientFd, std::vector<std::string> argument
 		std::cerr << "Error: Could not establish pipe for CGI output.\n";
 		return ERROR;
 	}
-	int	flags = fcntl(fd_body[1], F_GETFL, 0);
-	fcntl(fd_body[1], F_SETFL, flags | O_NONBLOCK);
 	pid = fork();
 	if (pid == -1)
 	{
